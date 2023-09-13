@@ -1,0 +1,55 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: nginx-ephemeral
+  namespace: emptydir-testing
+  labels:
+    app: nginx-ephemeral
+    app.openshift.io/runtime-version: 1.20-ubi7
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-ephemeral
+  template:
+    metadata:
+      labels:
+        app: nginx-ephemeral
+        deployment: nginx-ephemeral
+    spec:
+      containers:
+        - name: nginx-ephemeral
+          resources:
+            requests:
+              ephemeral-storage: "500Mi"
+            limits:
+              ephemeral-storage: "1Gi"
+          volumeMounts:
+            - name: ephemeral
+              mountPath: "/ephemeral"
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/emptydir-testing/nginx-sample@sha256:05c5e2ad0a4c598b76b49df2fd9ac438d71c1ac9eb1d4f813e14cfcb37ae2a58
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      volumes:
+        - name: ephemeral
+          #emptyDir:
+          #  sizeLimit: 500Mi
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
