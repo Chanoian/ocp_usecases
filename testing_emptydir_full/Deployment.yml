@@ -1,0 +1,56 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: nginx-sample
+  namespace: emptydir-testing
+  labels:
+    app: nginx-sample
+    app.kubernetes.io/component: nginx-sample
+    app.kubernetes.io/instance: nginx-sample
+    app.kubernetes.io/name: nginx-sample
+    app.kubernetes.io/part-of: sample-app
+    app.openshift.io/runtime: nginx
+    app.openshift.io/runtime-version: 1.20-ubi7
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-sample
+  template:
+    metadata:
+      labels:
+        app: nginx-sample
+        deployment: nginx-sample
+    spec:
+      volumes:
+        - name: testdir
+          emptyDir:
+            sizeLimit: 1Gi
+      containers:
+        - name: nginx-sample
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/emptydir-testing/nginx-sample@sha256:05c5e2ad0a4c598b76b49df2fd9ac438d71c1ac9eb1d4f813e14cfcb37ae2a58
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: testdir
+              mountPath: /testdir
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
