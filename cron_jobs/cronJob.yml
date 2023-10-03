@@ -1,0 +1,14 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: my-cronjob
+spec:
+  schedule: "*/5 * * * *" # Run every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: my-container
+            image: your-image-name:tag
+          restartPolicy: OnFailure
