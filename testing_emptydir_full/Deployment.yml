@@ -1,7 +1,7 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: nginx-sample
+  name: emptydir-testing
   namespace: emptydir-testing
   labels:
     app: nginx-sample
@@ -28,6 +28,9 @@ spec:
             sizeLimit: 1Gi
       containers:
         - name: nginx-sample
+          env:
+            - name: test
+              value: test
           image: >-
             image-registry.openshift-image-registry.svc:5000/emptydir-testing/nginx-sample@sha256:05c5e2ad0a4c598b76b49df2fd9ac438d71c1ac9eb1d4f813e14cfcb37ae2a58
           ports:
